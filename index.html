@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Wave Simulator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>2D Wave Simulator</h1>
+    <canvas id="myCanvas"></canvas>
+
+    <script src="js/field.js"></script>
+    <script src="js/visualisation/colormesh.js"></script>
+    <script src="js/visualisation/jet.js"></script>
+    <script>
+        const simHeight = 400;
+        const N = 400;
+        myCanvas.width = myCanvas.height = simHeight;
+        const ctx = myCanvas.getContext("2d");
+
+        const field = new Field(N, N, 0.4, 0.01);
+        const d = 5;
+        const numSources = 2;
+        for (let n = 0; n<numSources; n++) {
+            field.setSource([Math.floor(N/2) - Math.floor(Math.random() * 50 - 25), Math.floor(N/2)- Math.floor(Math.random() * 50 - 25), 0.1, Math.random()*1+0.5, 0]);
+        }
+        
+        field.setPML(32);
+        let lastTime = 0;
+        let deltaTime = 0;
+        const stepInterval = 50;
+        const stepsPerUpdate = 50;
+        let stepTimer = 0;
+
+        function animate(timestamp) {
+            deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            if (stepTimer > stepInterval) {
+                
+                for (let i=0; i<stepsPerUpdate; i++) {
+                    
+                    field.applySources();
+                
+                    field.update();
+                }
+                ctx.clearRect(0, 0, simHeight, simHeight);
+                colormesh(ctx, myCanvas.width, myCanvas.height, field.u, field.Nx, field.Ny, jet, {max: 0.01, min:-0.01, alpha: 0.5});
+                stepTimer = 0;
+            } else {
+                stepTimer += deltaTime;
+            }
+            
+            requestAnimationFrame(animate);
+        }
+
+        animate(0);
+    </script>
+</body>
+</html>
