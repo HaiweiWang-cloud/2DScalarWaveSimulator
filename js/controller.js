@@ -141,7 +141,7 @@ class Controller {
         this.canvas.addEventListener("touchend", () => this.dragging = false);
         this.canvas.addEventListener("touchstart", this.#handleTouchStart.bind(this));
         this.canvas.addEventListener("touchmove", this.#handleTouchMove.bind(this));
-        removeSource.addEventListener("click", this.#deleteSource.bind(this));
+        removeSource.addEventListener("click", () => this.#deleteSource(this.selected));
         window.addEventListener("keydown", this.#handleKeyDown.bind(this));
         this.canvas.addEventListener("contextmenu", (evt) => evt.preventDefault());
     }
