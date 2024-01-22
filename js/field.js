@@ -10,6 +10,7 @@ class Field {
         this.d = new Float32Array(this.num); // damping field
         this.d.fill(1.0);
         this.newU = new Float32Array(this.num); // update field
+        this.intensity = new Float32Array(this.num);
         this.h = h;
         this.dt = dt;
         this.t = 0;
@@ -20,8 +21,6 @@ class Field {
         const n = this.Ny;
         const h1 = 1.0 / this.h / this.h;
         const dt = this.dt;
-        const width = 0.5;
-        const t0 = 6
     
         for (let i=1; i<this.Nx-1; i++) {
             for (let j=1; j<this.Ny-1; j++) {
@@ -29,13 +28,14 @@ class Field {
                 const c = this.c[i*n+j];
                 const L = (this.u[(i+1)*n+j] + this.u[(i-1)*n+j] + this.u[i*n+j+1] + this.u[i*n+j-1] - 4*f)*h1;
 
-                const v = L * c * c * dt * dt + 2 * f - this.prevU[i*n+j] - dt * (1-this.d[i*n+j]) * (f - this.prevU[i*n+j]);
+                const v = L * c * c * dt * dt + 2 * f - this.prevU[i*n+j] - 0.5 * (1-this.d[i*n+j]) * (f - this.prevU[i*n+j]);
                 
                 this.newU[i*n+j] = v;
             }
         }
         this.prevU.set(this.u);
         this.u.set(this.newU);
+        this.intensity = this.u.map((field) => field * field);
         this.t += dt;
     }
 

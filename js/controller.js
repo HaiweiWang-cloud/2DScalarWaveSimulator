@@ -10,6 +10,9 @@ class Controller {
         this.selected = null;
         this.dragging = false;
 
+        this.fieldCm = new Twilight();
+        this.intensityCm = new Magma();
+
         this.#addEventListeners();
     }
 
@@ -82,8 +85,12 @@ class Controller {
         }
     }
 
-    drawField() {
-        colormesh(this.ctx, this.canvas.width, this.canvas.height, this.field.u, this.field.Nx, this.field.Ny, jet, {max: 1, min: -1, alpha: 0.5});
+    drawField(amplitude) {
+        colormesh(this.ctx, this.canvas.width, this.canvas.height, this.field.u, this.field.Nx, this.field.Ny, this.fieldCm.getValue.bind(this.fieldCm), {max: amplitude, min: -amplitude, alpha: 0.5});
+    }
+
+    drawIntensity(amplitude) {
+        colormesh(this.ctx, this.canvas.width, this.canvas.height, this.field.intensity, this.field.Nx, this.field.Ny, this.intensityCm.getValue.bind(this.intensityCm), {max: amplitude * amplitude, min: 0, alpha: 0.5});
     }
 
     drawSelectedPoints() {
@@ -104,13 +111,20 @@ class Controller {
         })
     }
 
-    draw({showAll = false} = {}) {
+    draw({showAll = false, showIntensity = false, amplitude = 1} = {}) {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawField();
-        this.drawSelectedPoints();
+        if (showIntensity) {
+            this.drawIntensity(amplitude);
+        } else {
+            this.drawField(amplitude);
+        }
+
         if (showAll) {
             this.drawAllSources();
         }
+
+        this.drawSelectedPoints();
+       
     }
 
     updateSourceInfo() {

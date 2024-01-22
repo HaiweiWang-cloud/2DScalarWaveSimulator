@@ -24,8 +24,8 @@
         <label for="stabilityRange">Courant stability:</label>
         <input id="stabilityRange" type="range" min="1" max="100">
         
-        <label for="maxFreq">maxFreq = </label>
-        <input id="maxFreq" type="number" value="1">
+        <label for="maxFreqInput">maxFreq = </label>
+        <input id="maxFreqInput" type="number" value="1" min="0">
 
         <select name="freqUnits" id="freqUnits">
             <option value="MHz">MHz</option>
@@ -53,6 +53,8 @@
     
     
     <div id="simulationDetails">
+        <label for="plotAmplitudeRange">Maximum color amplitude:</label>
+        0.1<input id="plotAmplitudeRange" type="range" min="1" max="10">1
         <label for="showIntensity">Intensity</label>
         <input type="checkbox" name="intensity" id="showIntensity">
         time = <span id="timeDisplay">0.0</span>
@@ -65,8 +67,6 @@
         <canvas id="editorCanvas"></canvas>
     </div>
     
-
-
     <img src="scene1.png" alt="scene" style="display : none" id="scene">
     <script src="js/field.js"></script>
     <script src="js/editor.js"></script>
@@ -75,8 +75,8 @@
     <script src="js/controller.js"></script>
     <script src="js/source.js"></script>
     <script src="js/visualisation/colormesh.js"></script>
-    <script src="js/visualisation/jet.js"></script>
-    <script src="js/visualisation/plasma.js"></script>
+    <script src="js/visualisation/magma.js"></script>
+    <script src="js/visualisation/twilight.js"></script>
     <script>
         const simHeight = 400;
         const N = 400;
@@ -85,16 +85,18 @@
 
         const editor = new Editor(editorCanvas);
         const controller = new Controller(myCanvas);
-        const maxFreq = 0.25;
 
         function restart() {
             const courantStability = Number(stabilityRange.value) / 100 * 0.25;
             const resolution = Number(resolutionSelect.value);
-            controller.initialiseGrid(N, N, courantStability, maxFreq, resolution);
+            console.log(Number(maxFreqInput.value))
+            controller.initialiseGrid(N, N, courantStability, Number(maxFreqInput.value), resolution);
             controller.field.t = 0;
-            const PMLThickness = 40;
+            const PMLThickness = resolution*2;
             controller.field.setPML(PMLThickness);
             controller.updateSourceInfo();
+            gridSpacingDisplay.innerText = controller.field.h.toFixed(3);
+            timeStepDisplay.innerText = controller.field.dt.toFixed(3);
         }
 
         function resetScene() {
@@ -102,8 +104,6 @@
 
             updateScene();
 
-            gridSpacingDisplay.innerText = controller.field.h;
-            timeStepDisplay.innerText = controller.field.dt.toFixed(3);
         }
 
         function updateScene() {
@@ -124,9 +124,10 @@
         }
 
         resetScene();
-        
+
         let lastTime = 0;
         let deltaTime = 0;
+        let showAll = false;
         const stepsPerUpdate = 3;
 
         function animate(timestamp) {
@@ -136,13 +137,13 @@
             if (!paused) {
                 for (let i=0; i<stepsPerUpdate; i++) {
                     controller.update();
-                    controller.draw();
+                    showAll = false;
                     timeDisplay.innerText = controller.field.t.toFixed(2);
                 }
             } else {
-                controller.draw({showAll: true});
+                showAll = true;
             }
-            
+            controller.draw({showAll: showAll, showIntensity: showIntensity.checked, amplitude: Number(plotAmplitudeRange.value)*0.1});
             
         
             requestAnimationFrame(animate);
