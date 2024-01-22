@@ -199,12 +199,12 @@ class Controller {
         this.dragging = true;
         this.#getTouchMouse(evt);
         this.hovered = getNearestPoint(this.mouse, this.sources, 10);
-        this.#handleLeftClick();
+        //this.#handleLeftClick(); 
     }
 
     #handleTouchMove(evt) {
         this.#getTouchMouse(evt);
-
+        
         this.#handleDrag();
     }
 
